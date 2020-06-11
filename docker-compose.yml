@@ -1,0 +1,39 @@
+version: '3'
+services:
+  web:
+    build:
+      context: containers
+      dockerfile: php5.6-apache.Dockerfile
+    image: burnbright/php5.6-wordpress
+    ports:
+      - "80:80"
+    volumes:
+      - ./sites:/var/www/html/
+    environment:
+      DB_HOST: 'database' # as per container above
+      DB_USER: 'root'
+      DB_PASSWORD: 'password'
+      XDEBUG_CONFIG: 'remote_host=docker.for.mac.host.internal remote_enable=0' # set this to 1 to enable debugging
+      SSMTP_HOST: 'mailhog'
+      SSMTP_PORT: '1025'
+    depends_on:
+      - database
+      - mailhog
+  database:
+    hostname: database
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - "4306:3306"
+    volumes:
+       - db-data:/var/lib/mysql
+  mailhog:
+    hostname: mailhog
+    image: mailhog/mailhog:latest
+    ports:
+        - "1025:1025"
+        - "8025:8025"
+volumes:
+  db-data:
